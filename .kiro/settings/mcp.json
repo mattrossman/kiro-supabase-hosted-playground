@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "supabase": {
-      "url": "http://127.0.0.1:54321/mcp",
+      "url": "https://mcp.supabase.green/mcp",
       "disabled": false,
       "autoApprove": [
         "list_tables",

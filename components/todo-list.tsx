@@ -1,27 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TodoItem, Todo } from "@/components/todo-item";
 import { TodoForm } from "@/components/todo-form";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 
 type TodoRow = Tables<"todos">;
 
@@ -35,50 +19,26 @@ function mapTodoFromDb(todo: TodoRow): Todo {
     id: todo.id,
     text: todo.title,
     completed: todo.completed || false,
-    priority: (todo.priority as "low" | "medium" | "high") || "low",
-    position: todo.position || 0,
   };
 }
 
 export function TodoList({ initialTodos, userId }: TodoListProps) {
-  const [todos, setTodos] = useState<Todo[]>(
-    initialTodos.map(mapTodoFromDb).sort((a, b) => a.position - b.position)
-  );
+  const [todos, setTodos] = useState<Todo[]>(initialTodos.map(mapTodoFromDb));
   const supabase = createClient();
-  const router = useRouter();
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleAddTodo = async (text: string, priority: "low" | "medium" | "high") => {
+  const handleAddTodo = async (text: string) => {
     if (!userId) return;
 
     const { data, error } = await supabase
       .from("todos")
-      .insert({ title: text, user_id: userId, priority, position: 0 })
+      .insert({ title: text, user_id: userId })
       .select()
       .single();
 
     if (error) {
       console.error("Error adding todo:", error);
     } else {
-      const newTodos = [mapTodoFromDb(data), ...todos].map((todo, index) => ({
-        ...todo,
-        position: index,
-      }));
-      setTodos(newTodos);
-      
-      // Update positions in database
-      await Promise.all(
-        newTodos.map((todo) =>
-          supabase.from("todos").update({ position: todo.position }).eq("id", todo.id)
-        )
-      );
-      router.refresh();
+      setTodos([mapTodoFromDb(data), ...todos]);
     }
   };
 
@@ -95,7 +55,6 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
       console.error("Error updating todo:", error);
     } else {
       setTodos(todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
-      router.refresh();
     }
   };
 
@@ -106,45 +65,6 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
       console.error("Error deleting todo:", error);
     } else {
       setTodos(todos.filter((todo) => todo.id !== id));
-      router.refresh();
-    }
-  };
-
-  const handlePriorityChange = async (id: string, priority: "low" | "medium" | "high") => {
-    const { error } = await supabase
-      .from("todos")
-      .update({ priority })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Error updating priority:", error);
-    } else {
-      setTodos(todos.map((t) => (t.id === id ? { ...t, priority } : t)));
-      router.refresh();
-    }
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = todos.findIndex((todo) => todo.id === active.id);
-      const newIndex = todos.findIndex((todo) => todo.id === over.id);
-
-      const newTodos = arrayMove(todos, oldIndex, newIndex).map((todo, index) => ({
-        ...todo,
-        position: index,
-      }));
-
-      setTodos(newTodos);
-
-      // Update positions in database
-      await Promise.all(
-        newTodos.map((todo) =>
-          supabase.from("todos").update({ position: todo.position }).eq("id", todo.id)
-        )
-      );
-      router.refresh();
     }
   };
 
@@ -170,31 +90,22 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <TodoForm onAddTodo={handleAddTodo} />
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={todos.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-1">
-              {todos.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No todos yet. Add one above to get started!
-                </p>
-              ) : (
-                todos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    todo={todo}
-                    onToggle={handleToggleTodo}
-                    onDelete={handleDeleteTodo}
-                    onPriorityChange={handlePriorityChange}
-                  />
-                ))
-              )}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <div className="space-y-1">
+          {todos.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No todos yet. Add one above to get started!
+            </p>
+          ) : (
+            todos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={handleToggleTodo}
+                onDelete={handleDeleteTodo}
+              />
+            ))
+          )}
+        </div>
       </CardContent>
     </Card>
   );

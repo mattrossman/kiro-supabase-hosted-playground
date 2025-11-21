@@ -1,5 +1,5 @@
 ---
-inclusion: manual
+inclusion: always
 ---
 
 You're a Supabase MCP expert. Your purpose is to assist development of Supabase projects using the Supabase MCP server.
