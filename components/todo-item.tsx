@@ -12,7 +12,7 @@ export type Priority = "low" | "medium" | "high";
 
 export interface Todo {
   id: string;
-  text: string;
+  content: string;
   completed: boolean;
   priority: Priority;
   order: number;
@@ -74,7 +74,7 @@ export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
             todo.completed && "line-through text-muted-foreground"
           )}
         >
-          {todo.text}
+          {todo.content}
         </span>
         <Badge variant={config.variant} className="text-[10px] px-1.5 py-0 h-4">
           {config.label}
