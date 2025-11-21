@@ -19,6 +19,7 @@ export type Database = {
           completed: boolean
           created_at: string
           id: string
+          priority: string
           text: string
           updated_at: string
           user_id: string
@@ -27,6 +28,7 @@ export type Database = {
           completed?: boolean
           created_at?: string
           id?: string
+          priority?: string
           text: string
           updated_at?: string
           user_id: string
@@ -35,6 +37,7 @@ export type Database = {
           completed?: boolean
           created_at?: string
           id?: string
+          priority?: string
           text?: string
           updated_at?: string
           user_id?: string

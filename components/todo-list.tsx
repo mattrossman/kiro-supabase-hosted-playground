@@ -19,6 +19,7 @@ function mapTodoFromDb(todo: TodoRow): Todo {
     id: todo.id,
     text: todo.text,
     completed: todo.completed,
+    priority: todo.priority as "low" | "medium" | "high",
   };
 }
 
@@ -26,12 +27,12 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
   const [todos, setTodos] = useState<Todo[]>(initialTodos.map(mapTodoFromDb));
   const supabase = createClient();
 
-  const handleAddTodo = async (text: string) => {
+  const handleAddTodo = async (text: string, priority: "low" | "medium" | "high") => {
     if (!userId) return;
 
     const { data, error } = await supabase
       .from("todos")
-      .insert({ text, user_id: userId })
+      .insert({ text, user_id: userId, priority })
       .select()
       .single();
 
