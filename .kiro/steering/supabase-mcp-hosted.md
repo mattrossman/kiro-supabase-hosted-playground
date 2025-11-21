@@ -20,13 +20,16 @@ Depending on which options the user has configured, tool behavior may vary. Refe
 
 Tools executing using this server affect the hosted Supabase project(s), and changes can be synced to the filesystem using Supabase CLI.
 
-Although you're working in a local editor, prefer development using this hosted Supabase instance.
+Although you're working in a local editor, prefer development using this hosted Supabase instance and use Supabase CLI to sync changes to the local `supabase/` folder.
+
+The user will likely have linked their Supabase CLI to a development project.
+You can find the linked project ref in `supabase/.temp/project-ref`, use this as the `project_id` in MCP tool calls.
 
 # Schema managament
 
-During development, you can iterate on the database schema with `apply_migration`.
+During development, you can check database schemas with `list_tables` and modify them with `apply_migration`.
 
-(Optional) If the user wishes to sync migrations to `supabase/migrations/` locally, you can do so with `supabase migration fetch`. By default don't sync migrations.
+After performing migrations you should sync them to `supabase/migrations/` locally with `supabase migration fetch`.
 
 # Type generation
 
@@ -35,3 +38,4 @@ While iterating on the schema, you can generate updated types with the `generate
 # Troubleshooting
 
 - Frontend error `Could not find the '<column>' column of '<table>' in the schema cache`: Update types to ensure code matches current schema, or update schema to match code (prompt user for choice)
+- No project ref: Run `supabase link` to link the workspace to a hosted development project

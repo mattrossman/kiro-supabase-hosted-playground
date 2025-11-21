@@ -3,8 +3,10 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2 } from "lucide-react";
+import { Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export type Priority = "low" | "medium" | "high";
 
@@ -13,6 +15,7 @@ export interface Todo {
   text: string;
   completed: boolean;
   priority: Priority;
+  order: number;
 }
 
 interface TodoItemProps {
@@ -29,9 +32,37 @@ const priorityConfig = {
 
 export function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
   const config = priorityConfig[todo.priority];
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
-    <div className="flex items-center gap-3 py-2 group">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-3 py-2 group bg-background",
+        isDragging && "opacity-50 z-50"
+      )}
+    >
+      <button
+        className="cursor-grab active:cursor-grabbing touch-none"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </button>
       <Checkbox
         checked={todo.completed}
         onCheckedChange={() => onToggle(todo.id)}

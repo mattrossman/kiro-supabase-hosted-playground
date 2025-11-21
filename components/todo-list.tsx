@@ -6,6 +6,21 @@ import { TodoItem, Todo } from "@/components/todo-item";
 import { TodoForm } from "@/components/todo-form";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 type TodoRow = Tables<"todos">;
 
@@ -20,26 +35,38 @@ function mapTodoFromDb(todo: TodoRow): Todo {
     text: todo.text,
     completed: todo.completed,
     priority: todo.priority as "low" | "medium" | "high",
+    order: todo.order,
   };
 }
 
 export function TodoList({ initialTodos, userId }: TodoListProps) {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos.map(mapTodoFromDb));
+  const [todos, setTodos] = useState<Todo[]>(
+    initialTodos.map(mapTodoFromDb).sort((a, b) => a.order - b.order)
+  );
   const supabase = createClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleAddTodo = async (text: string, priority: "low" | "medium" | "high") => {
     if (!userId) return;
 
+    const maxOrder = todos.length > 0 ? Math.max(...todos.map((t) => t.order)) : 0;
+
     const { data, error } = await supabase
       .from("todos")
-      .insert({ text, user_id: userId, priority })
+      .insert({ text, user_id: userId, priority, order: maxOrder + 1 })
       .select()
       .single();
 
     if (error) {
       console.error("Error adding todo:", error);
     } else {
-      setTodos([mapTodoFromDb(data), ...todos]);
+      setTodos([...todos, mapTodoFromDb(data)]);
     }
   };
 
@@ -69,6 +96,33 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = todos.findIndex((t) => t.id === active.id);
+    const newIndex = todos.findIndex((t) => t.id === over.id);
+
+    const newTodos = arrayMove(todos, oldIndex, newIndex);
+    
+    // Update local state immediately for smooth UX
+    setTodos(newTodos);
+
+    // Update order values in database
+    const updates = newTodos.map((todo, index) => ({
+      id: todo.id,
+      order: index,
+    }));
+
+    for (const update of updates) {
+      await supabase
+        .from("todos")
+        .update({ order: update.order })
+        .eq("id", update.id);
+    }
+  };
+
   if (!userId) {
     return (
       <Card className="w-full max-w-2xl min-w-[500px]">
@@ -91,22 +145,30 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <TodoForm onAddTodo={handleAddTodo} />
-        <div className="space-y-1">
-          {todos.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No todos yet. Add one above to get started!
-            </p>
-          ) : (
-            todos.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                onToggle={handleToggleTodo}
-                onDelete={handleDeleteTodo}
-              />
-            ))
-          )}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={todos} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1">
+              {todos.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No todos yet. Add one above to get started!
+                </p>
+              ) : (
+                todos.map((todo) => (
+                  <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggle={handleToggleTodo}
+                    onDelete={handleDeleteTodo}
+                  />
+                ))
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
       </CardContent>
     </Card>
   );
