@@ -31,6 +31,8 @@ During development, you can check database schemas with `list_tables` and modify
 
 After performing migrations you should sync them to `supabase/migrations/` locally with `supabase migration fetch`.
 
+The remote database schema / migration history may not always match what's reflected in workspace files. Assume the remote database is the source of truth for the desired schema, and use CLI / MCP to sync changes to the local workspace.
+
 # Type generation
 
 While iterating on the schema, you can generate updated types with the `generate_types` MCP tool and write the result to a file.
@@ -39,5 +41,5 @@ While iterating on the schema, you can generate updated types with the `generate
 
 - Frontend error `Could not find the '<column>' column of '<table>' in the schema cache`: Update types to ensure code matches current schema, or update schema to match code (prompt user for choice)
 - No project ref: Run `supabase link` to link the workspace to a hosted development project
-- Data not appearing in app: Ensure types are up to date with remote schema, update implementations
-- Remote schema changed without migrations causing history mismatch: Use  `supabase migration list` to check migration history mismatch. If remote DB has schema changes NOT tracked in migration history, create a migration with `supabase migration new <migration_name>` then `supabase migration repair <migration_id> --status applied` to mark as applied in remote history
+- Data not appearing in app: Ensure types are up to date with remote schema, update implementations, then ensure a new migration is created / repaired in remote (see below)
+- Remote schema changed without migration causing history mismatch: Use  `supabase migration list` to check migration history mismatch and/or `list_tables` to sanity check remote schemas. If remote DB has schema changes NOT tracked in migration history, create a migration file with `supabase db pull <migration_name>`

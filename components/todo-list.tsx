@@ -32,7 +32,7 @@ interface TodoListProps {
 function mapTodoFromDb(todo: TodoRow): Todo {
   return {
     id: todo.id,
-    text: todo.content,
+    text: todo.text,
     completed: todo.completed,
     priority: todo.priority as "low" | "medium" | "high",
     order: todo.order,
@@ -59,7 +59,7 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
 
     const { data, error } = await supabase
       .from("todos")
-      .insert({ content: text, user_id: userId, priority, order: maxOrder + 1 })
+      .insert({ text: text, user_id: userId, priority, order: maxOrder + 1 })
       .select()
       .single();
 
