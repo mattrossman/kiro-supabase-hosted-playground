@@ -17,8 +17,8 @@ interface TodoListProps {
 function mapTodoFromDb(todo: TodoRow): Todo {
   return {
     id: todo.id,
-    text: todo.title,
-    completed: todo.completed || false,
+    text: todo.text,
+    completed: todo.completed,
   };
 }
 
@@ -31,7 +31,7 @@ export function TodoList({ initialTodos, userId }: TodoListProps) {
 
     const { data, error } = await supabase
       .from("todos")
-      .insert({ title: text, user_id: userId })
+      .insert({ text, user_id: userId })
       .select()
       .single();
 
