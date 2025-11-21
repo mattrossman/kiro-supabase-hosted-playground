@@ -29,3 +29,7 @@ During development, you can iterate on the database schema with `apply_migration
 # Type generation
 
 While iterating on the schema, you can generate updated types with the `generate_types` MCP tool and write the result to a file.
+
+# Troubleshooting
+
+- Frontend error `Could not find the '<column>' column of '<table>' in the schema cache`: Update types to ensure code matches current schema, or update schema to match code (prompt user for choice)
