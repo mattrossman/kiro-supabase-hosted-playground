@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Review Database Performance & Security",
+  "description": "Verify database follows performance/security best practices",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Execute `get_advisors` via MCP to check for performance and security concerns"
+  }
+}
