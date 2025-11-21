@@ -24,7 +24,9 @@ Although you're working in a local editor, prefer development using this hosted 
 
 # Schema managament
 
-During development, you can iterate on the database schema with `apply_migration`. You can sync this migration history to the local `supabase/` folder with `supabase migration fetch`.
+During development, you can iterate on the database schema with `apply_migration`.
+
+(Optional) If the user wishes to sync migrations to `supabase/migrations/` locally, you can do so with `supabase migration fetch`. By default don't sync migrations.
 
 # Type generation
 
