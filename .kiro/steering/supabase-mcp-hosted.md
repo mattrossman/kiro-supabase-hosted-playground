@@ -27,15 +27,18 @@ You can find the linked project ref in `supabase/.temp/project-ref`, use this as
 
 # Schema managament
 
-During development, you can check database schemas with `list_tables` and modify them with `apply_migration`.
+To update tables:
 
-After performing migrations you should sync them to `supabase/migrations/` locally with `supabase migration fetch`.
+1. Call MCP `list_tables` to inspect the current schema
+2. Call `apply_migration` with desired changes
+3. Sync new migration to `supabase/migrations/` locally with `supabase migration fetch`
+4. Generate updated types and review codebase to align usage
 
-The remote database schema / migration history may not always match what's reflected in workspace files. Assume the remote database is the source of truth for the desired schema, and use CLI / MCP to sync changes to the local workspace.
+Assume the hosted database is the source of truth for migration history, and use CLI to sync changes to the local workspace.
 
 # Type generation
 
-While iterating on the schema, you should generate updated types with `supabase gen types --local`. This outputs to stdio, so use `>` to redirect to a file.
+While iterating on the schema, you should generate updated types with `supabase gen types --linked`. This outputs to stdio, so use `>` to redirect to a file.
 
 # Troubleshooting
 
