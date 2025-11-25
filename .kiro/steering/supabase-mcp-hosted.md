@@ -31,7 +31,7 @@ To update tables:
 
 1. Call MCP `list_tables` to inspect the current schema
 2. Call `apply_migration` with desired changes
-3. Sync new migration to `supabase/migrations/` locally with `supabase migration fetch`
+3. Sync new migration to `supabase/migrations/` locally with `supabase migration fetch --yes`
 4. Generate updated types and review codebase to align usage
 
 Assume the hosted database is the source of truth for migration history, and use CLI to sync changes to the local workspace.
