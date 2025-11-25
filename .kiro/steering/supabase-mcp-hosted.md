@@ -35,7 +35,7 @@ The remote database schema / migration history may not always match what's refle
 
 # Type generation
 
-While iterating on the schema, you can generate updated types with the `generate_types` MCP tool and write the result to a file.
+While iterating on the schema, you should generate updated types with `supabase gen types --local`. This outputs to stdio, so use `>` to redirect to a file.
 
 # Troubleshooting
 
