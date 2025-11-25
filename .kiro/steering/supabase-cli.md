@@ -21,6 +21,8 @@ Otherwise you can download and execute it on-the-fly with `npx`:
 npx supabase@latest <rest-of-command>
 ```
 
+For first-time setup, run `supabase init --yes` to initialize the `supabase/` with a `config.toml`.
+
 # Documentation
 
 Refer to https://supabase.com/docs/reference/cli for guidance on which commands to use for given request.
