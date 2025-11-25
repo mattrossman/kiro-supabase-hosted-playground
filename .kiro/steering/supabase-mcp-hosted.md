@@ -43,7 +43,6 @@ While iterating on the schema, you should generate updated types with `supabase 
 
 # Troubleshooting
 
-- Frontend error `Could not find the '<column>' column of '<table>' in the schema cache`: Update types to ensure code matches current schema, or update schema to match code (prompt user for choice)
+- Frontend error `Could not find the '<column>' column of '<table>' in the schema cache`: Update types + implementation to ensure code matches current schema
 - No project ref: Run `supabase link` to link the workspace to a hosted development project
-- Data not appearing in app: Ensure types are up to date with remote schema, update implementations, then ensure a new migration is created / repaired in remote (see below)
-- Remote schema changed without migration causing history mismatch: Use  `supabase migration list` to check migration history mismatch and/or `list_tables` to sanity check remote schemas. If remote DB has schema changes NOT tracked in migration history, run `supabase db pull <migration_name> --yes` to store changes in a new local migration file and repair remote migratio history
+- Data not appearing in app: Run `supabase db diff --linked`. If schema drift exists run `supabase db pull <migration_name> --yes` to store changes in a new local migration and repair remote migration history. Then proceed to update types and usage.

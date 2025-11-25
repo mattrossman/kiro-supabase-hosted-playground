@@ -14,7 +14,7 @@ interface ScratchpadProps {
 }
 
 export function Scratchpad({ initialNote, userId }: ScratchpadProps) {
-  const [content, setContent] = useState(initialNote?.content || "");
+  const [content, setContent] = useState(initialNote?.text || "");
   const [noteId, setNoteId] = useState(initialNote?.id);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
@@ -29,12 +29,12 @@ export function Scratchpad({ initialNote, userId }: ScratchpadProps) {
       if (noteId) {
         await supabase
           .from("notes")
-          .update({ content, updated_at: new Date().toISOString() })
+          .update({ text: content, updated_at: new Date().toISOString() })
           .eq("id", noteId);
       } else {
         const { data } = await supabase
           .from("notes")
-          .insert({ content, user_id: userId })
+          .insert({ text: content, user_id: userId })
           .select()
           .single();
         
